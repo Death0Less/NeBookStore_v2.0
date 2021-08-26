@@ -1,12 +1,10 @@
 package com.company.repository.database;
 
-import com.company.entity.Book;
-import com.company.entity.Order;
-import com.company.entity.Store;
-import com.company.entity.User;
+import com.company.entity.*;
 import com.company.repository.OrderRepository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -15,6 +13,16 @@ public class DbOrderRepository extends DbAbstractRepository implements OrderRepo
     private static final String INSERT_INTO_ORDERS = "insert into orders values (default, ?, ?, ?, ?)";
 
     public static final String INSERT_INTO_ORDER_BOOK = "insert into order_book values (?, ?)";
+
+    public static final String DELETE_FROM_ORDERS = "delete from orders where id = ?";
+
+    public static final String DELETE_FROM_ORDER_BOOK = "delete from order_book where order_id = ?";
+
+    public static final String FIND_ORDERS_BY_ID = "select * from orders o join stores s on o.store_id = s.id " +
+            "join users u on o.user_id = u.id join roles r on u.role_id = r.id join addresses a on a.id = s.address_id" +
+            "join cities c on c.id = s.city_id";
+
+    public static final String FIND_ORDER_BOOK_BY_ID = "";
 
 
     @Override
@@ -58,6 +66,29 @@ public class DbOrderRepository extends DbAbstractRepository implements OrderRepo
 
     @Override
     public void deleteOrder(int id) {
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_FROM_ORDERS);
+            preparedStatement.setInt(1, id);
+            preparedStatement.execute();
+            preparedStatement.close();
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(DELETE_FROM_ORDER_BOOK);
+            preparedStatement1.setInt(1, id);
+            preparedStatement1.execute();
+            preparedStatement1.close();
+
+            connection.commit();
+            connection.setAutoCommit(true);
+
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException sqlException1) {
+                sqlException1.printStackTrace();
+            }
+        }
 
     }
 
@@ -78,6 +109,24 @@ public class DbOrderRepository extends DbAbstractRepository implements OrderRepo
 
     @Override
     public List<Order> findAllByUser(User user) {
+        return null;
+    }
+
+    private User resultUser(ResultSet resultSet) {
+        try {
+
+            int userId = resultSet.getInt(10);
+            String lastName = resultSet.getString(11);
+            String firstName = resultSet.getString(12);
+            String email = resultSet.getString(13);
+            String password = resultSet.getString(14);
+            String role = resultSet.getString(17);
+
+            return new User(userId, lastName, firstName, email, password, Role.valueOf(role));
+
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
         return null;
     }
 }
