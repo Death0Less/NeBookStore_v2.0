@@ -44,17 +44,17 @@ public class UserActionImpl implements UserAction {
         }
         writer.writerStr("Введите email:");
         String email = reader.readStr();
-        /*if(!userValidator.checkEmail(email)){
+        if (!userValidator.checkEmail(email)) {
             writer.writerStr("Вы ввели не те данные");
             return;
-        }*/
+        }
 
         writer.writerStr("Введите пароль:");
         String password = reader.readStr();
-        /*if(!userValidator.checkPassword(password)){
+        if (!userValidator.checkPassword(password)) {
             writer.writerStr("Вы ввели не те данные");
             return;
-        }*/
+        }
 
         User user = new User(lastName, firstName, email, password, Role.VISITOR);
         userService.addUser(user);

@@ -30,9 +30,9 @@ public class DbUserRepository extends DbAbstractRepository implements UserReposi
 
     private static final String UPDATE_FIRSTNAME = "update users set firstName = ? where id = ?";
 
-    private static final String FIND_USER_BY_ID = "select * from users where id = ?";
+    private static final String FIND_USER_BY_ID = "select * from users u join roles r on u.role_id = r.id  where u.id = ?";
 
-    private static final String FIND_USER_BY_EMAIL = "select * from users where id = ?";
+    private static final String FIND_USER_BY_EMAIL = "select * from users u join roles r on u.role_id = r.id where u.email = ?";
 
 
     @Override
@@ -193,7 +193,7 @@ public class DbUserRepository extends DbAbstractRepository implements UserReposi
             String firstNameFromDb = resultSet.getString(3);
             String emailFromDb = resultSet.getString(4);
             String passwordFromDb = resultSet.getString(5);
-            String roleFromDb = resultSet.getString(6);
+            String roleFromDb = resultSet.getString(8);
 
             User userFromDb = new User(idFromDb, lastNameFromDb, firstNameFromDb, emailFromDb,
                     passwordFromDb, Role.valueOf(roleFromDb));
@@ -221,7 +221,7 @@ public class DbUserRepository extends DbAbstractRepository implements UserReposi
             String firstNameFromDb = resultSet.getString(3);
             String emailFromDb = resultSet.getString(4);
             String passwordFromDb = resultSet.getString(5);
-            String roleFromDb = resultSet.getString(6);
+            String roleFromDb = resultSet.getString(8);
 
             User userFromDb = new User(idFromDb, lastNameFromDb, firstNameFromDb, emailFromDb,
                     passwordFromDb, Role.valueOf(roleFromDb));

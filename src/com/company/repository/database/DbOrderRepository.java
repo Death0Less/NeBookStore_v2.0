@@ -29,6 +29,18 @@ public class DbOrderRepository extends DbAbstractRepository implements OrderRepo
     public static final String SELECT_STORE = "select * from stores s join orders o on s.id = o.store_id join cities c on s.city_id = c.id " +
             "where s.id = ?";
 
+    public static final String SELECT_ALL_FROM_ORDERS = "select * from orders o join stores s on o.store_id = s.id " +
+            "join users u on o.user_id = u.id join roles r on u.role_id = r.id join addresses a on a.id = s.address_id" +
+            "join cities c on c.id = s.city_id";
+
+    public static final String SELECT_ALL_BY_STORE = "select * from orders o join stores s on o.store_id = s.id" +
+            "join users u on o.user_id = u.id join roles r on u.role_id = r.id join addresses a on a.id = s.address_id" +
+            "join cities c on c.id = s.city_id where s.id = ?";
+
+    public static final String SELECT_ALL_BY_USER = "select * from orders o join stores s on o.store_id = s.id" +
+            "join users u on o.user_id = u.id join roles r on u.role_id = r.id join addresses a on a.id = s.address_id" +
+            "join cities c on c.id = s.city_id where u.id = ?";
+
 
     @Override
     public void addOrder(Order order) {
@@ -131,17 +143,100 @@ public class DbOrderRepository extends DbAbstractRepository implements OrderRepo
 
     @Override
     public List<Order> findAll() {
-        return null;
+        List<Order> orderList = new ArrayList<>();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_FROM_ORDERS);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int orderId = resultSet.getInt(1);
+
+            boolean isDeliveryFromDb = resultSet.getBoolean(4);
+
+            User userFromDb = getResultUser(resultSet);
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_BOOKS_BY_ORDER_ID);
+            preparedStatement1.setInt(1, orderId);
+
+            ResultSet resultSet1 = preparedStatement1.executeQuery();
+            List<Book> bookList = getResultBook(resultSet1);
+            Book[] books = bookList.toArray(new Book[0]);
+
+            if (isDeliveryFromDb) {
+                orderList.add(getOrderWithDelivery(resultSet, orderId, isDeliveryFromDb, userFromDb, books));
+            } else {
+                orderList.add(getOrderWithOutDelivery(resultSet, orderId, userFromDb, books, isDeliveryFromDb));
+            }
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
+        return orderList;
     }
 
     @Override
     public List<Order> findAllByStore(Store store) {
-        return null;
+        List<Order> orderList = new ArrayList<>();
+        int storeId = store.getId();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_BY_STORE);
+            preparedStatement.setInt(1, storeId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int orderId = resultSet.getInt(1);
+
+            boolean isDeliveryFromDb = resultSet.getBoolean(4);
+
+            User userFromDb = getResultUser(resultSet);
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_BOOKS_BY_ORDER_ID);
+            preparedStatement1.setInt(1, orderId);
+
+            ResultSet resultSet1 = preparedStatement1.executeQuery();
+            List<Book> bookList = getResultBook(resultSet1);
+            Book[] books = bookList.toArray(new Book[0]);
+
+            orderList.add(getOrderWithOutDelivery(resultSet, orderId, userFromDb, books, isDeliveryFromDb));
+
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
+        return orderList;
     }
 
     @Override
     public List<Order> findAllByUser(User user) {
-        return null;
+        List<Order> orderList = new ArrayList<>();
+        int userId = user.getId();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_BY_USER);
+            preparedStatement.setInt(1, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int orderId = resultSet.getInt(1);
+
+            boolean isDeliveryFromDb = resultSet.getBoolean(4);
+
+            User userFromDb = getResultUser(resultSet);
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_BOOKS_BY_ORDER_ID);
+            preparedStatement1.setInt(1, orderId);
+
+            ResultSet resultSet1 = preparedStatement1.executeQuery();
+            List<Book> bookList = getResultBook(resultSet1);
+            Book[] books = bookList.toArray(new Book[0]);
+
+            if (isDeliveryFromDb) {
+                orderList.add(getOrderWithDelivery(resultSet, orderId, isDeliveryFromDb, userFromDb, books));
+            } else {
+                orderList.add(getOrderWithOutDelivery(resultSet, orderId, userFromDb, books, isDeliveryFromDb));
+            }
+
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
+        return orderList;
     }
 
     private User getResultUser(ResultSet resultSet) {

@@ -16,11 +16,11 @@ public class UserValidator {
         return lastName.length() > 2;
     }
 
-   /* public boolean checkPassword(String password) {
-        final String PASSWORD_PATTERN="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
-        
-        pattern=Pattern.compile(PASSWORD_PATTERN);
-        matcher=pattern.matcher(password);
+    public boolean checkPassword(String password) {
+        final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
+
+        pattern = Pattern.compile(PASSWORD_PATTERN);
+        matcher = pattern.matcher(password);
         return matcher.matches();
     }
 
@@ -30,5 +30,5 @@ public class UserValidator {
         pattern= Pattern.compile(EMAIL_PATTERN);
         matcher=pattern.matcher(email);
         return matcher.matches();
-    }*/
+    }
 }
